@@ -1,1 +1,568 @@
-inde
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kim Milyoner Olmak İster?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#060a1c;
+    --bg-panel:#0e1638;
+    --bg-panel-light:#172256;
+    --gold:#f4c430;
+    --gold-soft:#e8b923;
+    --gold-dim:#8a6f1f;
+    --cyan:#2fd8ff;
+    --wrong:#ff3b5c;
+    --text-main:#eef1fb;
+    --text-dim:#8f9ac2;
+    --beam: radial-gradient(ellipse at center, rgba(47,216,255,0.16) 0%, rgba(47,216,255,0) 70%);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(47,216,255,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 100%, rgba(244,196,48,0.08), transparent 60%),
+      var(--bg-deep);
+    color:var(--text-main);
+    font-family:'Manrope',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Bebas Neue',sans-serif; letter-spacing:0.04em;}
+
+  /* ambient beam behind everything */
+  .stage-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      repeating-conic-gradient(from 0deg at 50% 8%, rgba(255,255,255,0.025) 0deg 1deg, transparent 1deg 6deg);
+    mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black, transparent 75%);
+  }
+
+  .app{position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column;}
+
+  header.top{
+    text-align:center; padding:28px 16px 10px;
+  }
+  header.top h1{
+    font-size:clamp(28px,5vw,46px);
+    color:var(--gold);
+    text-shadow:0 0 18px rgba(244,196,48,0.45), 0 0 2px rgba(244,196,48,0.8);
+  }
+  header.top p{color:var(--text-dim); font-size:13px; margin-top:4px; letter-spacing:0.08em; text-transform:uppercase;}
+
+  /* ---------- START SCREEN ---------- */
+  .screen{display:none; flex:1; width:100%;}
+  .screen.active{display:flex;}
+  #start-screen{
+    flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px; gap:22px;
+  }
+  .start-card{
+    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
+    border:1px solid rgba(244,196,48,0.25);
+    border-radius:18px;
+    padding:36px 32px;
+    max-width:520px;
+    box-shadow:0 0 60px rgba(47,216,255,0.08), inset 0 0 40px rgba(0,0,0,0.3);
+  }
+  .start-card h2{font-size:22px; margin-bottom:14px; color:var(--text-main);}
+  .start-card p{color:var(--text-dim); font-size:14.5px; line-height:1.6; margin-bottom:8px;}
+  .rules{text-align:left; margin:18px 0; font-size:13.5px; color:var(--text-dim); display:grid; gap:8px;}
+  .rules span{color:var(--gold-soft); font-weight:700;}
+
+  .btn{
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:15px;
+    border:none; border-radius:10px; cursor:pointer;
+    padding:14px 30px; color:#0a0e22;
+    background:linear-gradient(180deg, var(--gold), var(--gold-soft));
+    box-shadow:0 4px 0 var(--gold-dim), 0 8px 20px rgba(244,196,48,0.25);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--gold-dim);}
+  .btn.secondary{
+    background:transparent; color:var(--text-main);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:none;
+  }
+  .btn.secondary:hover{border-color:var(--gold-soft); color:var(--gold-soft);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed; transform:none; box-shadow:none;}
+
+  /* ---------- GAME SCREEN ---------- */
+  #game-screen{
+    flex-direction:column; align-items:center; padding:10px 16px 40px; gap:18px;
+  }
+  .game-layout{
+    width:100%; max-width:1080px;
+    display:grid;
+    grid-template-columns:1fr 210px;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width:820px){
+    .game-layout{grid-template-columns:1fr;}
+    .ladder{order:2;}
+    .main-col{order:1;}
+  }
+
+  .main-col{display:flex; flex-direction:column; gap:18px;}
+
+  .lifelines{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .life-btn{
+    width:56px; height:56px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #24346f, #0e1638);
+    border:2px solid rgba(244,196,48,0.5);
+    color:var(--gold-soft); font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; position:relative;
+    box-shadow:0 0 0 rgba(47,216,255,0);
+    transition:all .15s ease;
+  }
+  .life-btn:hover:not(:disabled){box-shadow:0 0 18px rgba(47,216,255,0.5); border-color:var(--cyan);}
+  .life-btn:disabled{opacity:0.25; cursor:not-allowed; text-decoration:line-through;}
+  .life-btn .lbl{position:absolute; bottom:-20px; font-size:10px; color:var(--text-dim); white-space:nowrap; text-transform:uppercase; letter-spacing:0.05em;}
+
+  .progress-row{display:flex; justify-content:center; align-items:center; gap:10px; color:var(--text-dim); font-size:13px;}
+  .progress-row .q-num{color:var(--gold); font-weight:800;}
+
+  .question-card{
+    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
+    border:1px solid rgba(47,216,255,0.25);
+    border-radius:16px;
+    padding:30px 26px;
+    text-align:center;
+    box-shadow:0 0 50px rgba(47,216,255,0.1), inset 0 0 30px rgba(0,0,0,0.3);
+    min-height:110px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .question-card h3{font-size:clamp(17px,2.4vw,22px); line-height:1.5; font-weight:700;}
+
+  .answers{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:520px){.answers{grid-template-columns:1fr;}}
+
+  .answer-btn{
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(90deg, var(--bg-panel), var(--bg-panel-light));
+    border:1.5px solid rgba(244,196,48,0.35);
+    color:var(--text-main);
+    font-family:'Manrope',sans-serif; font-weight:600; font-size:14.5px;
+    padding:16px 18px; border-radius:10px;
+    cursor:pointer; text-align:left;
+    transition:all .15s ease;
+    position:relative; overflow:hidden;
+  }
+  .answer-btn:hover:not(:disabled):not(.locked){
+    border-color:var(--cyan); box-shadow:0 0 18px rgba(47,216,255,0.35); transform:translateY(-1px);
+  }
+  .answer-key{
+    flex-shrink:0; width:28px; height:28px;
+    background:rgba(244,196,48,0.15);
+    border:1px solid var(--gold-soft);
+    color:var(--gold-soft); font-weight:800; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+    clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
+  }
+  .answer-btn:disabled{cursor:default;}
+  .answer-btn.eliminated{opacity:0.15; pointer-events:none;}
+  .answer-btn.correct{
+    border-color:#3ee87f; background:linear-gradient(90deg, rgba(62,232,127,0.18), rgba(62,232,127,0.05));
+    box-shadow:0 0 24px rgba(62,232,127,0.4);
+    animation:pulseCorrect 0.7s ease-in-out infinite alternate;
+  }
+  .answer-btn.wrong{
+    border-color:var(--wrong); background:linear-gradient(90deg, rgba(255,59,92,0.2), rgba(255,59,92,0.05));
+    box-shadow:0 0 24px rgba(255,59,92,0.4);
+  }
+  @keyframes pulseCorrect{from{box-shadow:0 0 14px rgba(62,232,127,0.35);} to{box-shadow:0 0 30px rgba(62,232,127,0.6);}}
+
+  .action-row{display:flex; justify-content:center; gap:12px; flex-wrap:wrap;}
+
+  /* ---------- MONEY LADDER (signature element) ---------- */
+  .ladder{
+    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
+    border:1px solid rgba(244,196,48,0.2);
+    border-radius:14px;
+    padding:14px 10px;
+    display:flex; flex-direction:column-reverse;
+    gap:5px;
+    position:relative;
+  }
+  .rung{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px;
+    font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.03em;
+    color:var(--text-dim);
+    clip-path: polygon(4% 0, 96% 0, 100% 50%, 96% 100%, 4% 100%, 0 50%);
+    background:rgba(255,255,255,0.02);
+    transition:all .3s ease;
+  }
+  .rung .rn{opacity:0.6; font-size:12px; width:18px;}
+  .rung.checkpoint{color:var(--gold-soft);}
+  .rung.checkpoint .rn{opacity:1;}
+  .rung.current{
+    background:linear-gradient(90deg, rgba(244,196,48,0.28), rgba(244,196,48,0.08));
+    color:var(--gold);
+    box-shadow:0 0 20px rgba(244,196,48,0.35);
+    transform:scale(1.04);
+  }
+  .rung.passed{color:var(--cyan); opacity:0.55;}
+  @media (max-width:820px){
+    .ladder{flex-direction:row; overflow-x:auto; gap:6px;}
+    .rung{flex-shrink:0; min-width:110px; justify-content:center; gap:8px;}
+  }
+
+  /* ---------- MODALS: phone / audience ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(3,6,18,0.75); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
+    border:1px solid rgba(47,216,255,0.3);
+    border-radius:16px; padding:26px; max-width:400px; width:100%;
+    box-shadow:0 0 60px rgba(47,216,255,0.2);
+  }
+  .modal h4{color:var(--cyan); font-size:15px; margin-bottom:14px; text-transform:uppercase; letter-spacing:0.06em;}
+  .modal p{font-size:14px; line-height:1.6; color:var(--text-main); margin-bottom:16px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+  .bar-row .bar-key{width:20px; color:var(--gold-soft); font-weight:800;}
+  .bar-track{flex:1; height:16px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden;}
+  .bar-fill{height:100%; background:linear-gradient(90deg, var(--cyan), #7be8ff); width:0%; transition:width 1s ease;}
+  .bar-pct{width:38px; text-align:right; color:var(--text-dim);}
+
+  /* ---------- END SCREEN ---------- */
+  #end-screen{flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; gap:18px;}
+  #end-screen .end-card{
+    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
+    border:1px solid rgba(244,196,48,0.3);
+    border-radius:18px; padding:40px 34px; max-width:480px;
+  }
+  #end-title{font-size:26px; margin-bottom:10px;}
+  #end-amount{font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--gold); text-shadow:0 0 20px rgba(244,196,48,0.5); margin-bottom:14px;}
+  #end-desc{color:var(--text-dim); font-size:14px; margin-bottom:22px; line-height:1.6;}
+
+  .confetti{position:fixed; top:-20px; z-index:60; pointer-events:none; border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="stage-bg"></div>
+<div class="app">
+  <header class="top">
+    <h1 class="display">KİM MİLYONER OLMAK İSTER?</h1>
+    <p>12 Soru · 1.000.000 ₺</p>
+  </header>
+
+  <!-- START -->
+  <section id="start-screen" class="screen active">
+    <div class="start-card">
+      <h2>Büyük ödüle hazır mısın?</h2>
+      <p>12 genel kültür sorusunu sırayla cevaplayarak 1.000.000 ₺'ye ulaşmaya çalış. Her yanlış cevap, en son geçtiğin garanti basamağa düşmene sebep olur.</p>
+      <div class="rules">
+        <div><span>5. ve 12. sorular</span> garanti basamaklardır.</div>
+        <div><span>3 joker</span> hakkın var: 50:50, Telefon ve Seyirci.</div>
+        <div><span>Parayı Topla</span> butonuyla istediğin an oyunu bitirip parayı cebe atabilirsin.</div>
+      </div>
+      <button class="btn" id="start-btn">OYUNA BAŞLA</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game-screen" class="screen">
+    <div class="game-layout">
+      <div class="main-col">
+        <div class="progress-row">Soru <span class="q-num" id="q-index">1</span> / 12</div>
+
+        <div class="lifelines">
+          <button class="life-btn" id="joker-5050">50:50<span class="lbl">50:50</span></button>
+          <button class="life-btn" id="joker-phone">☎<span class="lbl">Telefon</span></button>
+          <button class="life-btn" id="joker-audience">👥<span class="lbl">Seyirci</span></button>
+        </div>
+
+        <div class="question-card"><h3 id="question-text"></h3></div>
+
+        <div class="answers" id="answers-wrap"></div>
+
+        <div class="action-row">
+          <button class="btn secondary" id="walk-btn">PARAYI TOPLA</button>
+        </div>
+      </div>
+
+      <div class="ladder" id="ladder"></div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="end-screen" class="screen">
+    <div class="end-card">
+      <h2 id="end-title" class="display"></h2>
+      <div id="end-amount" class="display"></div>
+      <p id="end-desc"></p>
+      <button class="btn" id="restart-btn">TEKRAR OYNA</button>
+    </div>
+  </section>
+</div>
+
+<!-- Phone modal -->
+<div class="modal-overlay" id="phone-overlay">
+  <div class="modal">
+    <h4>☎ Telefon Jokeri</h4>
+    <p id="phone-text">Aranıyor...</p>
+    <button class="btn" id="phone-close">TAMAM</button>
+  </div>
+</div>
+
+<!-- Audience modal -->
+<div class="modal-overlay" id="audience-overlay">
+  <div class="modal">
+    <h4>👥 Seyirci Jokeri</h4>
+    <div id="audience-bars"></div>
+    <button class="btn" id="audience-close">TAMAM</button>
+  </div>
+</div>
+
+<script>
+const MONEY = [1000,2000,3000,5000,10000,25000,50000,100000,250000,500000,750000,1000000];
+const CHECKPOINTS = [4,11]; // 0-indexed positions of question 5 and 12
+
+const QUESTIONS = [
+  {q:"Türkiye'nin başkenti neresidir?", a:["İstanbul","Ankara","İzmir","Bursa"], c:1},
+  {q:"Güneş sistemindeki en büyük gezegen hangisidir?", a:["Dünya","Mars","Jüpiter","Satürn"], c:2},
+  {q:"\"Kuyucaklı Yusuf\" romanının yazarı kimdir?", a:["Reşat Nuri Güntekin","Sabahattin Ali","Yaşar Kemal","Ahmet Hamdi Tanpınar"], c:1},
+  {q:"Dünyanın en uzun nehri olarak kabul edilen nehir hangisidir?", a:["Amazon","Nil","Yangtze","Mississippi"], c:1},
+  {q:"İstanbul'u fetheden Osmanlı padişahı kimdir?", a:["I. Selim","Kanuni Sultan Süleyman","II. Mehmed","II. Bayezid"], c:2},
+  {q:"\"Mona Lisa\" tablosunun ressamı kimdir?", a:["Michelangelo","Rafael","Leonardo da Vinci","Rembrandt"], c:2},
+  {q:"İnsan vücudundaki en büyük organ hangisidir?", a:["Karaciğer","Deri","Akciğer","Beyin"], c:1},
+  {q:"2010 FIFA Dünya Kupası'nı hangi ülke kazandı?", a:["Almanya","Hollanda","İspanya","Brezilya"], c:2},
+  {q:"Periyodik tabloda \"Au\" sembolü hangi elementi temsil eder?", a:["Gümüş","Altın","Alüminyum","Argon"], c:1},
+  {q:"Nobel Barış Ödülü hangi ülkede verilir?", a:["İsveç","Norveç","Danimarka","Finlandiya"], c:1},
+  {q:"\"İlyada\" destanının yazarı olarak kabul edilen kişi kimdir?", a:["Sophokles","Homeros","Euripides","Aristoteles"], c:1},
+  {q:"Evrenin genişlediğini gözlemsel verilerle ilk ortaya koyan bilim insanı kimdir?", a:["Albert Einstein","Isaac Newton","Edwin Hubble","Stephen Hawking"], c:2},
+];
+
+let state = {};
+
+function fmt(n){ return n.toLocaleString('tr-TR') + ' ₺'; }
+
+function resetState(){
+  state = {
+    current:0,
+    jokers:{fifty:true, phone:true, audience:true},
+    eliminated:[],
+    answered:false,
+    guaranteed:0,
+  };
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderLadder(){
+  const ladder = document.getElementById('ladder');
+  ladder.innerHTML = '';
+  MONEY.forEach((amt, i)=>{
+    const div = document.createElement('div');
+    div.className = 'rung';
+    if(CHECKPOINTS.includes(i)) div.classList.add('checkpoint');
+    if(i === state.current) div.classList.add('current');
+    else if(i < state.current) div.classList.add('passed');
+    div.innerHTML = `<span class="rn">${i+1}</span><span>${fmt(amt)}</span>`;
+    ladder.appendChild(div);
+  });
+}
+
+function renderJokers(){
+  document.getElementById('joker-5050').disabled = !state.jokers.fifty;
+  document.getElementById('joker-phone').disabled = !state.jokers.phone;
+  document.getElementById('joker-audience').disabled = !state.jokers.audience;
+}
+
+function renderQuestion(){
+  state.answered = false;
+  state.eliminated = [];
+  const item = QUESTIONS[state.current];
+  document.getElementById('q-index').textContent = state.current + 1;
+  document.getElementById('question-text').textContent = item.q;
+  const wrap = document.getElementById('answers-wrap');
+  wrap.innerHTML = '';
+  const keys = ['A','B','C','D'];
+  item.a.forEach((ans, idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.dataset.idx = idx;
+    btn.innerHTML = `<span class="answer-key">${keys[idx]}</span><span>${ans}</span>`;
+    btn.addEventListener('click', ()=>handleAnswer(idx));
+    wrap.appendChild(btn);
+  });
+  renderLadder();
+  renderJokers();
+}
+
+function handleAnswer(idx){
+  if(state.answered) return;
+  state.answered = true;
+  const item = QUESTIONS[state.current];
+  const buttons = document.querySelectorAll('.answer-btn');
+  buttons.forEach(b=> b.disabled = true);
+
+  setTimeout(()=>{
+    buttons[item.c].classList.add('correct');
+    if(idx !== item.c){
+      buttons[idx].classList.add('wrong');
+    }
+
+    setTimeout(()=>{
+      if(idx === item.c){
+        if(CHECKPOINTS.includes(state.current)) state.guaranteed = state.current;
+        if(state.current === QUESTIONS.length - 1){
+          endGame('win', MONEY[state.current]);
+        } else {
+          state.current++;
+          renderQuestion();
+        }
+      } else {
+        const won = state.guaranteed > 0 ? MONEY[state.guaranteed] : 0;
+        endGame('lose', won);
+      }
+    }, 1400);
+  }, 500);
+}
+
+function endGame(type, amount){
+  showScreen('end-screen');
+  const title = document.getElementById('end-title');
+  const amt = document.getElementById('end-amount');
+  const desc = document.getElementById('end-desc');
+  if(type === 'win'){
+    title.textContent = 'TEBRİKLER! MİLYONERSİN!';
+    amt.textContent = fmt(amount);
+    desc.textContent = '12 soruyu da bilerek büyük ödülü kazandın.';
+    launchConfetti();
+  } else if(type === 'walk'){
+    title.textContent = 'Parayı Topladın';
+    amt.textContent = fmt(amount);
+    desc.textContent = 'Akıllıca bir karar — kazandığın parayla oyunu güvenle bitirdin.';
+  } else {
+    title.textContent = 'Oyun Bitti';
+    amt.textContent = fmt(amount);
+    desc.textContent = amount > 0
+      ? 'Yanlış cevap verdin ama garanti basamağın sayesinde bu parayı kazandın.'
+      : 'Yanlış cevap verdin ve elin boş kaldı. Bir dahaki sefere!';
+  }
+}
+
+function launchConfetti(){
+  const colors = ['#f4c430','#2fd8ff','#3ee87f','#ff3b5c'];
+  for(let i=0;i<70;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.width = el.style.height = (6+Math.random()*6)+'px';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.opacity = 0.9;
+    document.body.appendChild(el);
+    const duration = 2500 + Math.random()*2000;
+    el.animate([
+      {transform:`translateY(0) rotate(0deg)`, opacity:1},
+      {transform:`translateY(100vh) rotate(${360+Math.random()*360}deg)`, opacity:0.8}
+    ], {duration, easing:'ease-in'});
+    setTimeout(()=>el.remove(), duration);
+  }
+}
+
+/* ---- Jokers ---- */
+document.getElementById('joker-5050').addEventListener('click', ()=>{
+  if(!state.jokers.fifty || state.answered) return;
+  state.jokers.fifty = false;
+  renderJokers();
+  const item = QUESTIONS[state.current];
+  const wrongIdxs = [0,1,2,3].filter(i=> i !== item.c);
+  const toRemove = wrongIdxs.sort(()=>Math.random()-0.5).slice(0,2);
+  toRemove.forEach(i=>{
+    document.querySelector(`.answer-btn[data-idx="${i}"]`).classList.add('eliminated');
+  });
+});
+
+document.getElementById('joker-phone').addEventListener('click', ()=>{
+  if(!state.jokers.phone || state.answered) return;
+  state.jokers.phone = false;
+  renderJokers();
+  const item = QUESTIONS[state.current];
+  const activeIdxs = [0,1,2,3].filter(i=> !document.querySelector(`.answer-btn[data-idx="${i}"]`).classList.contains('eliminated'));
+  let guess;
+  if(Math.random() < 0.75){
+    guess = item.c;
+  } else {
+    const others = activeIdxs.filter(i=> i!==item.c);
+    guess = others[Math.floor(Math.random()*others.length)];
+  }
+  const keys = ['A','B','C','D'];
+  const confidence = 55 + Math.floor(Math.random()*30);
+  document.getElementById('phone-text').textContent =
+    `"Emin değilim ama sanırım cevap ${keys[guess]} şıkkı. Yaklaşık %${confidence} eminim."`;
+  document.getElementById('phone-overlay').classList.add('active');
+});
+document.getElementById('phone-close').addEventListener('click', ()=>{
+  document.getElementById('phone-overlay').classList.remove('active');
+});
+
+document.getElementById('joker-audience').addEventListener('click', ()=>{
+  if(!state.jokers.audience || state.answered) return;
+  state.jokers.audience = false;
+  renderJokers();
+  const item = QUESTIONS[state.current];
+  const activeIdxs = [0,1,2,3].filter(i=> !document.querySelector(`.answer-btn[data-idx="${i}"]`).classList.contains('eliminated'));
+  let weights = activeIdxs.map(i=> i===item.c ? 40+Math.random()*35 : 5+Math.random()*25);
+  const total = weights.reduce((a,b)=>a+b,0);
+  weights = weights.map(w=> Math.round(w/total*100));
+  let diff = 100 - weights.reduce((a,b)=>a+b,0);
+  weights[0] += diff;
+
+  const keys = ['A','B','C','D'];
+  const barsWrap = document.getElementById('audience-bars');
+  barsWrap.innerHTML = '';
+  activeIdxs.forEach((idx, n)=>{
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `<span class="bar-key">${keys[idx]}</span>
+      <div class="bar-track"><div class="bar-fill" id="bar-${idx}"></div></div>
+      <span class="bar-pct" id="pct-${idx}">0%</span>`;
+    barsWrap.appendChild(row);
+  });
+  document.getElementById('audience-overlay').classList.add('active');
+  setTimeout(()=>{
+    activeIdxs.forEach((idx,n)=>{
+      document.getElementById(`bar-${idx}`).style.width = weights[n] + '%';
+      document.getElementById(`pct-${idx}`).textContent = weights[n] + '%';
+    });
+  }, 100);
+});
+document.getElementById('audience-close').addEventListener('click', ()=>{
+  document.getElementById('audience-overlay').classList.remove('active');
+});
+
+/* ---- Walk away ---- */
+document.getElementById('walk-btn').addEventListener('click', ()=>{
+  if(state.answered) return;
+  const amount = state.current > 0 ? MONEY[state.current - 1] : 0;
+  endGame('walk', amount);
+});
+
+/* ---- Start / Restart ---- */
+document.getElementById('start-btn').addEventListener('click', ()=>{
+  resetState();
+  showScreen('game-screen');
+  renderQuestion();
+});
+document.getElementById('restart-btn').addEventListener('click', ()=>{
+  showScreen('start-screen');
+});
+</script>
+</body>
+</html>
