@@ -5,298 +5,303 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kim Milyoner Olmak İster?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#060a1c;
-    --bg-panel:#0e1638;
-    --bg-panel-light:#172256;
-    --gold:#f4c430;
-    --gold-soft:#e8b923;
-    --gold-dim:#8a6f1f;
-    --cyan:#2fd8ff;
+    --black:#050505;
+    --panel:#0a0a0a;
+    --gold:#e0a838;
+    --gold-bright:#f5a623;
+    --blue:#2f6df6;
+    --blue-glow:#1c3b8f;
     --wrong:#ff3b5c;
-    --text-main:#eef1fb;
-    --text-dim:#8f9ac2;
-    --beam: radial-gradient(ellipse at center, rgba(47,216,255,0.16) 0%, rgba(47,216,255,0) 70%);
+    --correct:#3ee87f;
+    --text-main:#f5f5f5;
+    --text-dim:#9aa0ab;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
   body{
-    background:
-      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(47,216,255,0.14), transparent 60%),
-      radial-gradient(ellipse 700px 500px at 100% 100%, rgba(244,196,48,0.08), transparent 60%),
-      var(--bg-deep);
+    background:var(--black);
     color:var(--text-main);
     font-family:'Manrope',sans-serif;
-    min-height:100vh;
-    overflow-x:hidden;
+    height:100%;
+    overflow:hidden;
   }
-  .display{font-family:'Bebas Neue',sans-serif; letter-spacing:0.04em;}
+  .display{font-family:'Bebas Neue',sans-serif; letter-spacing:0.03em;}
 
-  /* ambient beam behind everything */
-  .stage-bg{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      repeating-conic-gradient(from 0deg at 50% 8%, rgba(255,255,255,0.025) 0deg 1deg, transparent 1deg 6deg);
-    mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black, transparent 75%);
-  }
+  .app{position:relative; height:100vh; width:100vw; display:flex; flex-direction:column; overflow:hidden;}
 
-  .app{position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column;}
-
-  header.top{
-    text-align:center; padding:28px 16px 10px;
-  }
-  header.top h1{
-    font-size:clamp(28px,5vw,46px);
-    color:var(--gold);
-    text-shadow:0 0 18px rgba(244,196,48,0.45), 0 0 2px rgba(244,196,48,0.8);
-  }
-  header.top p{color:var(--text-dim); font-size:13px; margin-top:4px; letter-spacing:0.08em; text-transform:uppercase;}
-
-  /* ---------- START SCREEN ---------- */
-  .screen{display:none; flex:1; width:100%;}
+  /* ================= SCREENS ================= */
+  .screen{display:none; flex:1; width:100%; min-height:0;}
   .screen.active{display:flex;}
+
+  /* ---------- START ---------- */
   #start-screen{
     flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:24px; gap:22px;
+    text-align:center; padding:20px; gap:14px; overflow:auto;
+    background:
+      radial-gradient(ellipse 900px 600px at 50% 0%, var(--blue-glow) 0%, transparent 65%),
+      var(--black);
   }
   .start-card{
-    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
-    border:1px solid rgba(244,196,48,0.25);
+    background:rgba(5,5,5,0.75);
+    border:2px solid var(--gold);
     border-radius:18px;
-    padding:36px 32px;
+    padding:clamp(18px,3vh,32px) clamp(18px,3vw,32px);
     max-width:520px;
-    box-shadow:0 0 60px rgba(47,216,255,0.08), inset 0 0 40px rgba(0,0,0,0.3);
+    box-shadow:0 0 60px rgba(47,109,246,0.15);
   }
-  .start-card h2{font-size:22px; margin-bottom:14px; color:var(--text-main);}
-  .start-card p{color:var(--text-dim); font-size:14.5px; line-height:1.6; margin-bottom:8px;}
-  .rules{text-align:left; margin:18px 0; font-size:13.5px; color:var(--text-dim); display:grid; gap:8px;}
-  .rules span{color:var(--gold-soft); font-weight:700;}
+  header.top-title h1{
+    font-size:clamp(20px,4vw,36px); color:var(--gold-bright);
+    text-shadow:0 0 20px rgba(245,166,35,0.6);
+  }
+  .start-card h2{font-size:19px; margin:10px 0 10px; color:var(--text-main);}
+  .start-card p{color:var(--text-dim); font-size:13.5px; line-height:1.55; margin-bottom:6px;}
+  .rules{text-align:left; margin:14px 0; font-size:12.5px; color:var(--text-dim); display:grid; gap:6px;}
+  .rules span{color:var(--gold-bright); font-weight:700;}
 
   .btn{
-    font-family:'Manrope',sans-serif; font-weight:700; font-size:15px;
-    border:none; border-radius:10px; cursor:pointer;
-    padding:14px 30px; color:#0a0e22;
-    background:linear-gradient(180deg, var(--gold), var(--gold-soft));
-    box-shadow:0 4px 0 var(--gold-dim), 0 8px 20px rgba(244,196,48,0.25);
-    transition:transform .12s ease, box-shadow .12s ease;
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:14px;
+    border:2px solid var(--gold); border-radius:10px; cursor:pointer;
+    padding:12px 26px; color:var(--gold-bright);
+    background:#000;
+    transition:all .15s ease;
   }
-  .btn:hover{transform:translateY(-2px);}
-  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--gold-dim);}
-  .btn.secondary{
-    background:transparent; color:var(--text-main);
-    border:1px solid rgba(255,255,255,0.25);
-    box-shadow:none;
-  }
-  .btn.secondary:hover{border-color:var(--gold-soft); color:var(--gold-soft);}
-  .btn:disabled{opacity:0.35; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn:hover{background:var(--gold-bright); color:#000;}
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{padding:10px 20px; font-size:13px;}
+  .btn:disabled{opacity:0.3; cursor:not-allowed;}
 
   /* ---------- GAME SCREEN ---------- */
   #game-screen{
-    flex-direction:column; align-items:center; padding:10px 16px 40px; gap:18px;
-  }
-  .game-layout{
-    width:100%; max-width:1080px;
-    display:grid;
-    grid-template-columns:1fr 210px;
-    gap:22px;
-    align-items:start;
-  }
-  @media (max-width:820px){
-    .game-layout{grid-template-columns:1fr;}
-    .ladder{order:2;}
-    .main-col{order:1;}
+    flex-direction:column; padding:0; min-height:0; position:relative;
   }
 
-  .main-col{display:flex; flex-direction:column; gap:18px;}
+  .stage-strip{
+    flex-shrink:0;
+    position:relative;
+    background:
+      radial-gradient(ellipse 700px 400px at 50% -10%, var(--blue-glow) 0%, transparent 70%),
+      linear-gradient(180deg,#0c1a3d 0%, #050505 100%);
+    padding:clamp(6px,1.6vh,14px) 16px clamp(30px,5vh,54px);
+    display:flex; flex-direction:column; align-items:center; gap:clamp(6px,1.4vh,14px);
+  }
 
-  .lifelines{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .jokers-row{display:flex; gap:14px; justify-content:center; flex-shrink:0;}
   .life-btn{
-    width:56px; height:56px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #24346f, #0e1638);
-    border:2px solid rgba(244,196,48,0.5);
-    color:var(--gold-soft); font-size:12px; font-weight:800;
+    width:clamp(34px,5vh,48px); height:clamp(34px,5vh,48px); border-radius:50%;
+    background:rgba(0,0,0,0.55);
+    border:2px solid var(--blue);
+    color:#eaf1ff; font-size:11px; font-weight:800;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; position:relative;
-    box-shadow:0 0 0 rgba(47,216,255,0);
-    transition:all .15s ease;
+    transition:all .15s ease; flex-shrink:0;
+    box-shadow:0 0 10px rgba(47,109,246,0.35);
   }
-  .life-btn:hover:not(:disabled){box-shadow:0 0 18px rgba(47,216,255,0.5); border-color:var(--cyan);}
-  .life-btn:disabled{opacity:0.25; cursor:not-allowed; text-decoration:line-through;}
-  .life-btn .lbl{position:absolute; bottom:-20px; font-size:10px; color:var(--text-dim); white-space:nowrap; text-transform:uppercase; letter-spacing:0.05em;}
+  .life-btn:hover:not(:disabled){box-shadow:0 0 16px rgba(47,109,246,0.7);}
+  .life-btn:disabled{border-color:var(--wrong); color:var(--wrong); opacity:0.7; cursor:not-allowed;}
+  .life-btn:disabled::after{
+    content:'✕'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:var(--wrong); font-size:20px; font-weight:900; background:rgba(0,0,0,0.35); border-radius:50%;
+  }
+  .life-btn.locked{border-color:#3a3a3a; color:#3a3a3a; opacity:0.5; cursor:not-allowed;}
+  .life-btn.locked::after{display:none;}
 
-  .progress-row{display:flex; justify-content:center; align-items:center; gap:10px; color:var(--text-dim); font-size:13px;}
-  .progress-row .q-num{color:var(--gold); font-weight:800;}
+  .spot-circle{
+    width:clamp(30px,4.5vh,44px); height:clamp(30px,4.5vh,44px); border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #1a2a55, #000 75%);
+    border:2px solid var(--gold);
+    box-shadow:0 0 18px rgba(224,168,56,0.4);
+    flex-shrink:0;
+  }
+
+  .progress-row{color:var(--text-dim); font-size:12px; flex-shrink:0;}
+  .progress-row .q-num{color:var(--gold-bright); font-weight:800;}
+
+  .main-col{
+    flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center;
+    gap:clamp(10px,2vh,18px); padding:clamp(10px,2vh,18px) clamp(14px,3vw,28px);
+  }
 
   .question-card{
-    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
-    border:1px solid rgba(47,216,255,0.25);
+    background:#000;
+    border:2px solid var(--gold);
     border-radius:16px;
-    padding:30px 26px;
+    padding:clamp(16px,3vh,28px) 24px;
     text-align:center;
-    box-shadow:0 0 50px rgba(47,216,255,0.1), inset 0 0 30px rgba(0,0,0,0.3);
-    min-height:110px;
+    box-shadow:0 0 30px rgba(224,168,56,0.15), inset 0 0 20px rgba(0,0,0,0.6);
     display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    min-height:clamp(70px,14vh,120px);
   }
-  .question-card h3{font-size:clamp(17px,2.4vw,22px); line-height:1.5; font-weight:700;}
+  .question-card h3{font-size:clamp(15px,2.1vw,21px); line-height:1.45; font-weight:700;}
 
-  .answers{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media (max-width:520px){.answers{grid-template-columns:1fr;}}
+  .answers{display:grid; grid-template-columns:1fr 1fr; gap:clamp(10px,1.8vh,16px); flex-shrink:0;}
+  @media (max-width:560px){.answers{grid-template-columns:1fr;}}
 
   .answer-btn{
-    display:flex; align-items:center; gap:12px;
-    background:linear-gradient(90deg, var(--bg-panel), var(--bg-panel-light));
-    border:1.5px solid rgba(244,196,48,0.35);
+    display:flex; align-items:center; gap:10px;
+    background:#000;
+    border:2px solid var(--gold);
+    border-radius:999px;
     color:var(--text-main);
-    font-family:'Manrope',sans-serif; font-weight:600; font-size:14.5px;
-    padding:16px 18px; border-radius:10px;
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:clamp(12.5px,1.5vw,15px);
+    padding:clamp(12px,2.2vh,18px) 20px; 
     cursor:pointer; text-align:left;
     transition:all .15s ease;
-    position:relative; overflow:hidden;
   }
   .answer-btn:hover:not(:disabled):not(.locked){
-    border-color:var(--cyan); box-shadow:0 0 18px rgba(47,216,255,0.35); transform:translateY(-1px);
+    background:rgba(224,168,56,0.12); box-shadow:0 0 16px rgba(224,168,56,0.35);
   }
-  .answer-key{
-    flex-shrink:0; width:28px; height:28px;
-    background:rgba(244,196,48,0.15);
-    border:1px solid var(--gold-soft);
-    color:var(--gold-soft); font-weight:800; font-size:13px;
-    display:flex; align-items:center; justify-content:center;
-    clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
-  }
+  .answer-key{color:var(--gold-bright); font-weight:900; flex-shrink:0;}
   .answer-btn:disabled{cursor:default;}
-  .answer-btn.eliminated{opacity:0.15; pointer-events:none;}
-  .answer-btn.correct{
-    border-color:#3ee87f; background:linear-gradient(90deg, rgba(62,232,127,0.18), rgba(62,232,127,0.05));
-    box-shadow:0 0 24px rgba(62,232,127,0.4);
-    animation:pulseCorrect 0.7s ease-in-out infinite alternate;
-  }
-  .answer-btn.wrong{
-    border-color:var(--wrong); background:linear-gradient(90deg, rgba(255,59,92,0.2), rgba(255,59,92,0.05));
-    box-shadow:0 0 24px rgba(255,59,92,0.4);
-  }
-  @keyframes pulseCorrect{from{box-shadow:0 0 14px rgba(62,232,127,0.35);} to{box-shadow:0 0 30px rgba(62,232,127,0.6);}}
+  .answer-btn.eliminated{opacity:0.12; pointer-events:none;}
+  .answer-btn.selected{border-color:var(--blue); background:rgba(47,109,246,0.15); box-shadow:0 0 16px rgba(47,109,246,0.4);}
+  .answer-btn.correct{border-color:var(--correct); background:rgba(62,232,127,0.15); box-shadow:0 0 22px rgba(62,232,127,0.45);}
+  .answer-btn.wrong{border-color:var(--wrong); background:rgba(255,59,92,0.15); box-shadow:0 0 22px rgba(255,59,92,0.45);}
 
-  .action-row{display:flex; justify-content:center; gap:12px; flex-wrap:wrap;}
+  .action-row{display:flex; justify-content:center; flex-shrink:0;}
 
-  /* ---------- MONEY LADDER (signature element) ---------- */
-  .ladder{
-    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
-    border:1px solid rgba(244,196,48,0.2);
-    border-radius:14px;
-    padding:14px 10px;
+  /* ================= layout: main + ladder ================= */
+  .body-layout{
+    flex:1; min-height:0; display:grid;
+    grid-template-columns:1fr clamp(150px,18vw,210px);
+    gap:0;
+  }
+  @media (max-width:700px) and (orientation:portrait){
+    .body-layout{grid-template-columns:1fr; grid-template-rows:1fr auto;}
+  }
+
+  /* ---------- MONEY LADDER ---------- */
+  .ladder-col{
+    background:#000;
+    border-left:2px solid #1c1c1c;
     display:flex; flex-direction:column-reverse;
-    gap:5px;
-    position:relative;
+    padding:clamp(6px,1.4vh,12px) clamp(6px,1vw,10px);
+    gap:clamp(3px,0.8vh,6px);
+    min-height:0;
+  }
+  @media (max-width:700px) and (orientation:portrait){
+    .ladder-col{flex-direction:row; overflow-x:auto; border-left:none; border-top:2px solid #1c1c1c; max-height:60px;}
   }
   .rung{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:8px 12px;
-    font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.03em;
-    color:var(--text-dim);
-    clip-path: polygon(4% 0, 96% 0, 100% 50%, 96% 100%, 4% 100%, 0 50%);
-    background:rgba(255,255,255,0.02);
-    transition:all .3s ease;
+    flex:1 1 0;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:999px;
+    border:2px solid var(--gold);
+    color:#fff;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(11px,1.5vh,14.5px);
+    letter-spacing:0.02em;
+    background:transparent;
   }
-  .rung .rn{opacity:0.6; font-size:12px; width:18px;}
-  .rung.checkpoint{color:var(--gold-soft);}
-  .rung.checkpoint .rn{opacity:1;}
+  .rung.checkpoint{border-color:var(--blue);}
   .rung.current{
-    background:linear-gradient(90deg, rgba(244,196,48,0.28), rgba(244,196,48,0.08));
-    color:var(--gold);
-    box-shadow:0 0 20px rgba(244,196,48,0.35);
-    transform:scale(1.04);
+    background:var(--gold-bright); border-color:var(--gold-bright);
+    color:#1a0f00; font-weight:800;
+    box-shadow:0 0 18px rgba(245,166,35,0.6);
   }
-  .rung.passed{color:var(--cyan); opacity:0.55;}
-  @media (max-width:820px){
-    .ladder{flex-direction:row; overflow-x:auto; gap:6px;}
-    .rung{flex-shrink:0; min-width:110px; justify-content:center; gap:8px;}
+  .rung.passed{opacity:0.35;}
+  @media (max-width:700px) and (orientation:portrait){
+    .rung{min-width:104px; flex:0 0 auto;}
   }
 
-  /* ---------- MODALS: phone / audience ---------- */
+  .walk-cell{
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    padding-top:clamp(4px,1vh,8px);
+  }
+  .walk-btn{
+    width:100%;
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:13px;
+    border:2px solid var(--gold); border-radius:10px; cursor:pointer;
+    padding:10px 8px; color:var(--gold-bright); background:#000;
+  }
+  .walk-btn:hover{background:var(--gold-bright); color:#000;}
+  .walk-btn:disabled{opacity:0.3; cursor:not-allowed;}
+  @media (max-width:700px) and (orientation:portrait){
+    .walk-cell{padding:6px 8px;}
+  }
+
+  /* ---------- MODALS ---------- */
   .modal-overlay{
-    position:fixed; inset:0; background:rgba(3,6,18,0.75); backdrop-filter:blur(3px);
+    position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(3px);
     display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
   }
   .modal-overlay.active{display:flex;}
   .modal{
-    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
-    border:1px solid rgba(47,216,255,0.3);
-    border-radius:16px; padding:26px; max-width:400px; width:100%;
-    box-shadow:0 0 60px rgba(47,216,255,0.2);
+    background:#0a0a0a; border:2px solid var(--gold);
+    border-radius:16px; padding:24px; max-width:380px; width:100%;
+    box-shadow:0 0 60px rgba(224,168,56,0.2);
   }
-  .modal h4{color:var(--cyan); font-size:15px; margin-bottom:14px; text-transform:uppercase; letter-spacing:0.06em;}
-  .modal p{font-size:14px; line-height:1.6; color:var(--text-main); margin-bottom:16px;}
-  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
-  .bar-row .bar-key{width:20px; color:var(--gold-soft); font-weight:800;}
-  .bar-track{flex:1; height:16px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden;}
-  .bar-fill{height:100%; background:linear-gradient(90deg, var(--cyan), #7be8ff); width:0%; transition:width 1s ease;}
-  .bar-pct{width:38px; text-align:right; color:var(--text-dim);}
+  .modal h4{color:var(--gold-bright); font-size:14px; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.06em;}
+  .modal p{font-size:13.5px; line-height:1.6; color:var(--text-main); margin-bottom:14px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:9px; font-size:12.5px;}
+  .bar-row .bar-key{width:18px; color:var(--gold-bright); font-weight:800;}
+  .bar-track{flex:1; height:14px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--blue); width:0%; transition:width 1s ease;}
+  .bar-pct{width:36px; text-align:right; color:var(--text-dim);}
 
   /* ---------- END SCREEN ---------- */
-  #end-screen{flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; gap:18px;}
-  #end-screen .end-card{
-    background:linear-gradient(180deg, var(--bg-panel-light), var(--bg-panel));
-    border:1px solid rgba(244,196,48,0.3);
-    border-radius:18px; padding:40px 34px; max-width:480px;
+  #end-screen{
+    flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:16px; gap:14px;
+    background:radial-gradient(ellipse 900px 600px at 50% 0%, var(--blue-glow) 0%, transparent 65%), var(--black);
   }
-  #end-title{font-size:26px; margin-bottom:10px;}
-  #end-amount{font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--gold); text-shadow:0 0 20px rgba(244,196,48,0.5); margin-bottom:14px;}
-  #end-desc{color:var(--text-dim); font-size:14px; margin-bottom:22px; line-height:1.6;}
+  #end-screen .end-card{
+    background:rgba(5,5,5,0.8); border:2px solid var(--gold);
+    border-radius:18px; padding:clamp(24px,4vh,40px) 30px; max-width:460px;
+  }
+  #end-title{font-size:22px; margin-bottom:8px;}
+  #end-amount{font-family:'Bebas Neue',sans-serif; font-size:40px; color:var(--gold-bright); text-shadow:0 0 20px rgba(245,166,35,0.5); margin-bottom:12px;}
+  #end-desc{color:var(--text-dim); font-size:13.5px; margin-bottom:18px; line-height:1.6;}
 
   .confetti{position:fixed; top:-20px; z-index:60; pointer-events:none; border-radius:2px;}
 </style>
 </head>
 <body>
-<div class="stage-bg"></div>
 <div class="app">
-  <header class="top">
-    <h1 class="display">KİM MİLYONER OLMAK İSTER?</h1>
-    <p>12 Soru · 1.000.000 ₺</p>
-  </header>
 
-  <!-- START -->
   <section id="start-screen" class="screen active">
+    <header class="top-title"><h1 class="display">KİM MİLYONER OLMAK İSTER?</h1></header>
     <div class="start-card">
       <h2>Büyük ödüle hazır mısın?</h2>
-      <p>12 genel kültür sorusunu sırayla cevaplayarak 1.000.000 ₺'ye ulaşmaya çalış. Her yanlış cevap, en son geçtiğin garanti basamağa düşmene sebep olur.</p>
+      <p>12 genel kültür sorusunu sırayla cevaplayarak 1.000.000 TL'ye ulaşmaya çalış. Her yanlış cevap, en son geçtiğin garanti basamağa düşmene sebep olur.</p>
       <div class="rules">
         <div><span>5. ve 12. sorular</span> garanti basamaklardır.</div>
-        <div><span>3 joker</span> hakkın var: 50:50, Telefon ve Seyirci.</div>
-        <div><span>Parayı Topla</span> butonuyla istediğin an oyunu bitirip parayı cebe atabilirsin.</div>
+        <div><span>4 joker</span> hakkın var: 50:50, Telefon, Seyirci ve 2. Şans.</div>
+        <div><span>2. Şans</span> jokeri sadece 5. soru barajını geçtikten sonra açılır ve aynı soruda iki cevap seçmeni sağlar.</div>
+        <div><span>ÇEKİL</span> butonuyla istediğin an oyunu bitirip parayı cebe atabilirsin.</div>
       </div>
       <button class="btn" id="start-btn">OYUNA BAŞLA</button>
     </div>
   </section>
 
-  <!-- GAME -->
   <section id="game-screen" class="screen">
-    <div class="game-layout">
-      <div class="main-col">
-        <div class="progress-row">Soru <span class="q-num" id="q-index">1</span> / 12</div>
-
-        <div class="lifelines">
-          <button class="life-btn" id="joker-5050">50:50<span class="lbl">50:50</span></button>
-          <button class="life-btn" id="joker-phone">☎<span class="lbl">Telefon</span></button>
-          <button class="life-btn" id="joker-audience">👥<span class="lbl">Seyirci</span></button>
+    <div class="body-layout">
+      <div class="main-col-wrap" style="display:flex; flex-direction:column; min-height:0;">
+        <div class="stage-strip">
+          <div class="jokers-row">
+            <button class="life-btn" id="joker-5050" title="50:50">50:50</button>
+            <button class="life-btn" id="joker-audience" title="Seyirci">👥</button>
+            <button class="life-btn" id="joker-phone" title="Telefon">☎</button>
+            <button class="life-btn locked" id="joker-second" title="2. Şans (barajdan sonra)">1:2</button>
+          </div>
+          <div class="spot-circle"></div>
+          <div class="progress-row">Soru <span class="q-num" id="q-index">1</span> / 12</div>
         </div>
-
-        <div class="question-card"><h3 id="question-text"></h3></div>
-
-        <div class="answers" id="answers-wrap"></div>
-
-        <div class="action-row">
-          <button class="btn secondary" id="walk-btn">PARAYI TOPLA</button>
+        <div class="main-col">
+          <div class="question-card"><h3 id="question-text"></h3></div>
+          <div class="answers" id="answers-wrap"></div>
         </div>
       </div>
 
-      <div class="ladder" id="ladder"></div>
+      <div class="ladder-col">
+        <div class="walk-cell"><button class="btn walk-btn" id="walk-btn">ÇEKİL</button></div>
+        <div id="ladder" style="display:flex; flex-direction:column-reverse; gap:inherit; flex:1; min-height:0;"></div>
+      </div>
     </div>
   </section>
 
-  <!-- END -->
   <section id="end-screen" class="screen">
     <div class="end-card">
       <h2 id="end-title" class="display"></h2>
@@ -307,7 +312,6 @@
   </section>
 </div>
 
-<!-- Phone modal -->
 <div class="modal-overlay" id="phone-overlay">
   <div class="modal">
     <h4>☎ Telefon Jokeri</h4>
@@ -316,7 +320,6 @@
   </div>
 </div>
 
-<!-- Audience modal -->
 <div class="modal-overlay" id="audience-overlay">
   <div class="modal">
     <h4>👥 Seyirci Jokeri</h4>
@@ -326,8 +329,9 @@
 </div>
 
 <script>
-const MONEY = [1000,2000,3000,5000,10000,25000,50000,100000,250000,500000,750000,1000000];
-const CHECKPOINTS = [4,11]; // 0-indexed positions of question 5 and 12
+const MONEY = [500,1000,2000,3000,5000,7500,15000,30000,60000,125000,250000,1000000];
+const CHECKPOINTS = [1,11];
+const SECOND_CHANCE_UNLOCK = 6;
 
 const QUESTIONS = [
   {q:"Türkiye'nin başkenti neresidir?", a:["İstanbul","Ankara","İzmir","Bursa"], c:1},
@@ -336,7 +340,7 @@ const QUESTIONS = [
   {q:"Dünyanın en uzun nehri olarak kabul edilen nehir hangisidir?", a:["Amazon","Nil","Yangtze","Mississippi"], c:1},
   {q:"İstanbul'u fetheden Osmanlı padişahı kimdir?", a:["I. Selim","Kanuni Sultan Süleyman","II. Mehmed","II. Bayezid"], c:2},
   {q:"\"Mona Lisa\" tablosunun ressamı kimdir?", a:["Michelangelo","Rafael","Leonardo da Vinci","Rembrandt"], c:2},
-  {q:"İnsan vücudundaki en büyük organ hangisidir?", a:["Karaciğer","Deri","Akciğer","Beyin"], c:1},
+  {q:"\"Tanrı Parçacığı\" olarak bilinen teoremiyle, 2013 Nobel Fizik Ödülü'nü kazanan fizikçi kimdir?", a:["Peter Higgs","Stephen Hawking","Carl Sagan","Arthur C. Clarke"], c:0},
   {q:"2010 FIFA Dünya Kupası'nı hangi ülke kazandı?", a:["Almanya","Hollanda","İspanya","Brezilya"], c:2},
   {q:"Periyodik tabloda \"Au\" sembolü hangi elementi temsil eder?", a:["Gümüş","Altın","Alüminyum","Argon"], c:1},
   {q:"Nobel Barış Ödülü hangi ülkede verilir?", a:["İsveç","Norveç","Danimarka","Finlandiya"], c:1},
@@ -346,15 +350,16 @@ const QUESTIONS = [
 
 let state = {};
 
-function fmt(n){ return n.toLocaleString('tr-TR') + ' ₺'; }
+function fmt(n){ return n.toLocaleString('tr-TR') + ' TL'; }
 
 function resetState(){
   state = {
     current:0,
-    jokers:{fifty:true, phone:true, audience:true},
-    eliminated:[],
+    jokers:{fifty:true, phone:true, audience:true, second:true},
     answered:false,
     guaranteed:0,
+    doubleMode:false,
+    doubleSelected:[],
   };
 }
 
@@ -372,7 +377,7 @@ function renderLadder(){
     if(CHECKPOINTS.includes(i)) div.classList.add('checkpoint');
     if(i === state.current) div.classList.add('current');
     else if(i < state.current) div.classList.add('passed');
-    div.innerHTML = `<span class="rn">${i+1}</span><span>${fmt(amt)}</span>`;
+    div.textContent = fmt(amt);
     ladder.appendChild(div);
   });
 }
@@ -381,11 +386,24 @@ function renderJokers(){
   document.getElementById('joker-5050').disabled = !state.jokers.fifty;
   document.getElementById('joker-phone').disabled = !state.jokers.phone;
   document.getElementById('joker-audience').disabled = !state.jokers.audience;
+
+  const secondBtn = document.getElementById('joker-second');
+  const unlocked = state.current >= SECOND_CHANCE_UNLOCK;
+  if(!unlocked){
+    secondBtn.classList.add('locked');
+    secondBtn.disabled = true;
+    secondBtn.title = 'Barajdan sonra açılır';
+  } else {
+    secondBtn.classList.remove('locked');
+    secondBtn.disabled = !state.jokers.second;
+    secondBtn.title = '2. Şans';
+  }
 }
 
 function renderQuestion(){
   state.answered = false;
-  state.eliminated = [];
+  state.doubleMode = false;
+  state.doubleSelected = [];
   const item = QUESTIONS[state.current];
   document.getElementById('q-index').textContent = state.current + 1;
   document.getElementById('question-text').textContent = item.q;
@@ -396,29 +414,42 @@ function renderQuestion(){
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
     btn.dataset.idx = idx;
-    btn.innerHTML = `<span class="answer-key">${keys[idx]}</span><span>${ans}</span>`;
+    btn.innerHTML = `<span class="answer-key">${keys[idx]} :</span><span>${ans}</span>`;
     btn.addEventListener('click', ()=>handleAnswer(idx));
     wrap.appendChild(btn);
   });
   renderLadder();
   renderJokers();
+  document.getElementById('walk-btn').disabled = false;
 }
 
 function handleAnswer(idx){
   if(state.answered) return;
-  state.answered = true;
   const item = QUESTIONS[state.current];
   const buttons = document.querySelectorAll('.answer-btn');
+
+  if(state.doubleMode){
+    const btn = buttons[idx];
+    if(btn.classList.contains('eliminated') || btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    state.doubleSelected.push(idx);
+    if(state.doubleSelected.length < 2) return;
+  }
+
+  state.answered = true;
+  document.getElementById('walk-btn').disabled = true;
   buttons.forEach(b=> b.disabled = true);
 
   setTimeout(()=>{
     buttons[item.c].classList.add('correct');
-    if(idx !== item.c){
-      buttons[idx].classList.add('wrong');
+    const pickedIdxs = state.doubleMode ? state.doubleSelected : [idx];
+    const isCorrect = pickedIdxs.includes(item.c);
+    if(!isCorrect){
+      pickedIdxs.forEach(i=> buttons[i].classList.add('wrong'));
     }
 
     setTimeout(()=>{
-      if(idx === item.c){
+      if(isCorrect){
         if(CHECKPOINTS.includes(state.current)) state.guaranteed = state.current;
         if(state.current === QUESTIONS.length - 1){
           endGame('win', MONEY[state.current]);
@@ -458,7 +489,7 @@ function endGame(type, amount){
 }
 
 function launchConfetti(){
-  const colors = ['#f4c430','#2fd8ff','#3ee87f','#ff3b5c'];
+  const colors = ['#f5a623','#2f6df6','#3ee87f','#ff3b5c'];
   for(let i=0;i<70;i++){
     const el = document.createElement('div');
     el.className = 'confetti';
@@ -476,7 +507,6 @@ function launchConfetti(){
   }
 }
 
-/* ---- Jokers ---- */
 document.getElementById('joker-5050').addEventListener('click', ()=>{
   if(!state.jokers.fifty || state.answered) return;
   state.jokers.fifty = false;
@@ -547,14 +577,21 @@ document.getElementById('audience-close').addEventListener('click', ()=>{
   document.getElementById('audience-overlay').classList.remove('active');
 });
 
-/* ---- Walk away ---- */
+document.getElementById('joker-second').addEventListener('click', ()=>{
+  const unlocked = state.current >= SECOND_CHANCE_UNLOCK;
+  if(!unlocked || !state.jokers.second || state.answered) return;
+  state.jokers.second = false;
+  state.doubleMode = true;
+  state.doubleSelected = [];
+  renderJokers();
+});
+
 document.getElementById('walk-btn').addEventListener('click', ()=>{
   if(state.answered) return;
   const amount = state.current > 0 ? MONEY[state.current - 1] : 0;
   endGame('walk', amount);
 });
 
-/* ---- Start / Restart ---- */
 document.getElementById('start-btn').addEventListener('click', ()=>{
   resetState();
   showScreen('game-screen');
