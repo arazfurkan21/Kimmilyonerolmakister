@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çok Kollu Yaratık</title>
+    <title>Çok Bacaklı Yaratık</title>
     <style>
         body, html {
             margin: 0;
@@ -47,7 +47,7 @@
         });
 
         let segments = [];
-        const numSegments = 55; 
+        const numSegments = 50; 
         const baseDistance = 9.0; 
 
         for (let i = 0; i < numSegments; i++) {
@@ -58,7 +58,6 @@
             let targetX = Input.mouse.x;
             let targetY = Input.mouse.y;
 
-            // Hızı düşürülerek daha yumuşak ve süzülen bir hareket sağlandı
             segments[0].x += (targetX - segments[0].x) * 0.08;
             segments[0].y += (targetY - segments[0].y) * 0.08;
 
@@ -90,42 +89,45 @@
             }
             ctx.stroke();
 
-            // Çizgilere tam yapışık çoklu kollar ve bacaklar
-            for (let i = 3; i < segments.length - 2; i += 2) {
+            // Kaburgalar ve bacaklar (Hatalı uzun çizgiler giderildi, düzgün bacaklar eklendi)
+            for (let i = 4; i < segments.length - 3; i += 3) {
                 let current = segments[i];
                 let next = segments[i + 1];
                 
                 let angle = Math.atan2(next.y - current.y, next.x - current.x);
                 let perpAngle = angle + Math.PI / 2; 
 
-                let armLength = (55 * Math.sin((Math.PI * i) / segments.length)) + 10;
+                let legLength = 35 * Math.sin((Math.PI * i) / segments.length) + 12;
 
-                // Doğrudan omurga çizgisi üzerinden (çizgiye yapışık) başlayan bacak uçları
-                let leftX = current.x + Math.cos(perpAngle) * armLength;
-                let leftY = current.y + Math.sin(perpAngle) * armLength;
+                // Sol bacak ucu
+                let leftX = current.x + Math.cos(perpAngle) * legLength;
+                let leftY = current.y + Math.sin(perpAngle) * legLength;
                 
-                let rightX = current.x - Math.cos(perpAngle) * armLength;
-                let rightY = current.y - Math.sin(perpAngle) * armLength;
-
-                // Eklem yapıları
-                let kneeBend = Math.sin(Date.now() * 0.005 + i) * 15;
-                let midLeftX = (current.x + leftX) / 2 - Math.sin(angle) * kneeBend;
-                let midLeftY = (current.y + leftY) / 2 + Math.cos(angle) * kneeBend;
-
-                let midRightX = (current.x + rightX) / 2 + Math.sin(angle) * kneeBend;
-                let midRightY = (current.y - rightY) / 2 - Math.cos(angle) * kneeBend;
+                // Sağ bacak ucu
+                let rightX = current.x - Math.cos(perpAngle) * legLength;
+                let rightY = current.y - Math.sin(perpAngle) * legLength;
 
                 ctx.beginPath();
-                // Sol bacak (omurgadan direkt başlar)
+                // Sol bacak gövdeden çıkış
                 ctx.moveTo(current.x, current.y);
-                ctx.lineTo(midLeftX, midLeftY);
                 ctx.lineTo(leftX, leftY);
 
-                // Sağ bacak (omurgadan direkt başlar)
+                // Sol bacak parmakları (Uç kısıma minik çatallar/parmaklar)
+                ctx.moveTo(leftX, leftY);
+                ctx.lineTo(leftX + Math.cos(perpAngle + 0.5) * 6, leftY + Math.sin(perpAngle + 0.5) * 6);
+                ctx.moveTo(leftX, leftY);
+                ctx.lineTo(leftX + Math.cos(perpAngle - 0.5) * 6, leftY + Math.sin(perpAngle - 0.5) * 6);
+
+                // Sağ bacak gövdeden çıkış
                 ctx.moveTo(current.x, current.y);
-                ctx.lineTo(midRightX, midRightY);
                 ctx.lineTo(rightX, rightY);
-                
+
+                // Sağ bacak parmakları
+                ctx.moveTo(rightX, rightY);
+                ctx.lineTo(rightX + Math.cos(perpAngle - 0.5 + Math.PI) * 6, rightY + Math.sin(perpAngle - 0.5 + Math.PI) * 6);
+                ctx.moveTo(rightX, rightY);
+                ctx.lineTo(rightX + Math.cos(perpAngle + 0.5 + Math.PI) * 6, rightY + Math.sin(perpAngle + 0.5 + Math.PI) * 6);
+
                 ctx.stroke();
             }
 
