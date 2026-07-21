@@ -3,147 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çok Bacaklı Yaratık</title>
+    <title>Interactive Dragon</title>
     <style>
-        body, html {
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1a1a1a;
             overflow: hidden;
-            background-color: #0b0b0b;
             cursor: crosshair;
         }
+        
         canvas {
             display: block;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-
-    <canvas id="creatureCanvas"></canvas>
-
+    <div class="info">🐉 Interactive Dragon - Mouse'u hareket ettir</div>
+    <canvas id="canvas"></canvas>
+    
     <script>
-        const canvas = document.getElementById("creatureCanvas");
-        const ctx = canvas.getContext("2d");
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Mouse pozisyonu
+        let mouse = {
+            x: canvas.width / 2,
+            y: canvas.height / 2
+        };
+        
+        // Input nesnesi (görüntüdeki gibi)
         const Input = {
             mouse: {
-                x: canvas.width / 2,
-                y: canvas.height / 2
+                left: false,
+                middle: false,
+                right: false
             }
         };
-
-        window.addEventListener("mousemove", (event) => {
-            Input.mouse.x = event.clientX;
-            Input.mouse.y = event.clientY;
+        
+        // Mouse event listener'ları
+        document.addEventListener("mouseup", function(event) {
+            if ((event.button = 0)) {
+                Input.mouse.left = false;
+            }
+            if ((event.button = 1)) {
+                Input.mouse.middle = false;
+            }
+            if ((event.button = 2)) {
+                Input.mouse.right = false;
+            }
         });
-
-        let segments = [];
-        const numSegments = 50; 
-        const baseDistance = 9.0; 
-
-        for (let i = 0; i < numSegments; i++) {
-            segments.push({ x: canvas.width / 2, y: canvas.height / 2 });
-        }
-
-        function update() {
-            let targetX = Input.mouse.x;
-            let targetY = Input.mouse.y;
-
-            segments[0].x += (targetX - segments[0].x) * 0.08;
-            segments[0].y += (targetY - segments[0].y) * 0.08;
-
-            for (let i = 1; i < segments.length; i++) {
-                let lead = segments[i - 1];
-                let current = segments[i];
-                let dx = lead.x - current.x;
-                let dy = lead.y - current.y;
-                let angle = Math.atan2(dy, dx);
-
-                current.x = lead.x - Math.cos(angle) * baseDistance;
-                current.y = lead.y - Math.sin(angle) * baseDistance;
+        
+        document.addEventListener("mousedown", function(event) {
+            if (event.button === 0) {
+                Input.mouse.left = true;
+            }
+            if (event.button === 1) {
+                Input.mouse.middle = true;
+            }
+            if (event.button === 2) {
+                Input.mouse.right = true;
+            }
+        });
+        
+        document.addEventListener("mousemove", function(event) {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        });
+        
+        window.addEventListener("resize", function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Ejderha segmentleri
+        const segmentCount = 30;
+        const segments = [];
+        
+        // Segment sınıfı
+        class Segment {
+            constructor(x, y, angle, length) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.length = length;
+                this.targetX = x;
+                this.targetY = y;
+            }
+            
+            update(targetX, targetY) {
+                const dx = targetX - this.x;
+                const dy = targetY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Açıyı hesapla
+                this.angle = Math.atan2(dy, dx);
+                
+                // Hedef pozisyonu güncelle
+                const offsetX = Math.cos(this.angle) * this.length;
+                const offsetY = Math.sin(this.angle) * this.length;
+                
+                this.targetX = this.x + offsetX;
+                this.targetY = this.y + offsetY;
+                
+                // Yumuşak hareket
+                this.x += (targetX - this.x) * 0.1;
+                this.y += (targetY - this.y) * 0.1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f0';
+                ctx.fill();
             }
         }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.lineWidth = 1.5;
-            ctx.lineCap = "round";
-
-            // Omurga çizgisi
+        
+        // Ejderha oluştur
+        function initDragon() {
+            let x = canvas.width / 2;
+            let y = canvas.height / 2;
+            let angle = 0;
+            const segmentLength = 15;
+            
+            for (let i = 0; i < segmentCount; i++) {
+                segments.push(new Segment(x, y, angle, segmentLength));
+                x += Math.cos(angle) * segmentLength;
+                y += Math.sin(angle) * segmentLength;
+            }
+        }
+        
+        // Ejderha çiz (wireframe stili)
+        function drawDragon() {
+            ctx.strokeStyle = '#0f0';
+            ctx.lineWidth = 2;
+            
+            // Ana omurga
             ctx.beginPath();
             ctx.moveTo(segments[0].x, segments[0].y);
+            
             for (let i = 1; i < segments.length; i++) {
-                ctx.lineTo(segments[i].x, segments[i].y);
+                const prev = segments[i - 1];
+                const curr = segments[i];
+                
+                // Omurga çizgisi
+                ctx.lineTo(curr.x, curr.y);
+                
+                // Kaburgalar (spiral etki)
+                const ribAngle = curr.angle + Math.PI / 2;
+                const ribLength = 20 - (i * 0.5);
+                
+                const ribX1 = curr.x + Math.cos(ribAngle) * ribLength;
+                const ribY1 = curr.y + Math.sin(ribAngle) * ribLength;
+                const ribX2 = curr.x - Math.cos(ribAngle) * ribLength;
+                const ribY2 = curr.y - Math.sin(ribAngle) * ribLength;
+                
+                ctx.moveTo(ribX1, ribY1);
+                ctx.lineTo(curr.x, curr.y);
+                ctx.lineTo(ribX2, ribY2);
+                ctx.moveTo(curr.x, curr.y);
             }
+            
             ctx.stroke();
-
-            // Kaburgalar ve bacaklar (Hatalı uzun çizgiler giderildi, düzgün bacaklar eklendi)
-            for (let i = 4; i < segments.length - 3; i += 3) {
-                let current = segments[i];
-                let next = segments[i + 1];
-                
-                let angle = Math.atan2(next.y - current.y, next.x - current.x);
-                let perpAngle = angle + Math.PI / 2; 
-
-                let legLength = 35 * Math.sin((Math.PI * i) / segments.length) + 12;
-
-                // Sol bacak ucu
-                let leftX = current.x + Math.cos(perpAngle) * legLength;
-                let leftY = current.y + Math.sin(perpAngle) * legLength;
-                
-                // Sağ bacak ucu
-                let rightX = current.x - Math.cos(perpAngle) * legLength;
-                let rightY = current.y - Math.sin(perpAngle) * legLength;
-
-                ctx.beginPath();
-                // Sol bacak gövdeden çıkış
-                ctx.moveTo(current.x, current.y);
-                ctx.lineTo(leftX, leftY);
-
-                // Sol bacak parmakları (Uç kısıma minik çatallar/parmaklar)
-                ctx.moveTo(leftX, leftY);
-                ctx.lineTo(leftX + Math.cos(perpAngle + 0.5) * 6, leftY + Math.sin(perpAngle + 0.5) * 6);
-                ctx.moveTo(leftX, leftY);
-                ctx.lineTo(leftX + Math.cos(perpAngle - 0.5) * 6, leftY + Math.sin(perpAngle - 0.5) * 6);
-
-                // Sağ bacak gövdeden çıkış
-                ctx.moveTo(current.x, current.y);
-                ctx.lineTo(rightX, rightY);
-
-                // Sağ bacak parmakları
-                ctx.moveTo(rightX, rightY);
-                ctx.lineTo(rightX + Math.cos(perpAngle - 0.5 + Math.PI) * 6, rightY + Math.sin(perpAngle - 0.5 + Math.PI) * 6);
-                ctx.moveTo(rightX, rightY);
-                ctx.lineTo(rightX + Math.cos(perpAngle + 0.5 + Math.PI) * 6, rightY + Math.sin(perpAngle + 0.5 + Math.PI) * 6);
-
-                ctx.stroke();
-            }
-
-            // Baş Kısmı
+            
+            // Kafa
+            const head = segments[0];
             ctx.beginPath();
-            ctx.arc(segments[0].x, segments[0].y, 5, 0, Math.PI * 2);
+            ctx.arc(head.x, head.y, 12, 0, Math.PI * 2);
+            ctx.fillStyle = '#0f0';
             ctx.fill();
+            
+            // Gözler
+            const eyeOffset = 5;
+            const leftEyeX = head.x + Math.cos(head.angle - 0.5) * eyeOffset;
+            const leftEyeY = head.y + Math.sin(head.angle - 0.5) * eyeOffset;
+            const rightEyeX = head.x + Math.cos(head.angle + 0.5) * eyeOffset;
+            const rightEyeY = head.y + Math.sin(head.angle + 0.5) * eyeOffset;
+            
+            ctx.beginPath();
+            ctx.arc(leftEyeX, leftEyeY, 3, 0, Math.PI * 2);
+            ctx.arc(rightEyeX, rightEyeY, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            
+            // Kuyruk
+            const tail = segments[segments.length - 1];
+            ctx.beginPath();
+            ctx.moveTo(tail.x, tail.y);
+            const tailTipX = tail.x + Math.cos(tail.angle) * tail.length * 2;
+            const tailTipY = tail.y + Math.sin(tail.angle) * tail.length * 2;
+            ctx.lineTo(tailTipX, tailTipY);
+            ctx.strokeStyle = '#0f0';
+            ctx.lineWidth = 3;
+            ctx.stroke();
         }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
+        
+        // Ejderha güncelle
+        function updateDragon() {
+            // İlk segment mouse'u takip eder
+            segments[0].update(mouse.x, mouse.y);
+            
+            // Diğer segmentler bir öncekini takip eder
+            for (let i = 1; i < segments.length; i++) {
+                const prev = segments[i - 1];
+                segments[i].update(prev.x, prev.y);
+            }
         }
-
-        loop();
+        
+        // Animasyon döngüsü
+        function animate() {
+            ctx.fillStyle = 'rgba(26, 26, 26, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            updateDragon();
+            drawDragon();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Başlat
+        initDragon();
+        animate();
+        
+        // İlk tıklama için
+        document.addEventListener('click', function() {
+            Input.mouse.left = true;
+            setTimeout(() => {
+                Input.mouse.left = false;
+            }, 100);
+        });
     </script>
 </body>
 </html>
