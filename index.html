@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Korkutucu İskelet Takibi</title>
+    <title>Çok Kollu Korkutucu Yaratık</title>
     <style>
         body, html {
             margin: 0;
@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #050505; /* Çok daha koyu zemin */
+            background-color: #0b0b0b;
             cursor: crosshair;
         }
         canvas {
@@ -21,10 +21,10 @@
 </head>
 <body>
 
-    <canvas id="skeletonCanvas"></canvas>
+    <canvas id="creatureCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById("skeletonCanvas");
+        const canvas = document.getElementById("creatureCanvas");
         const ctx = canvas.getContext("2d");
 
         function resizeCanvas() {
@@ -46,10 +46,10 @@
             Input.mouse.y = event.clientY;
         });
 
-        // Korkutucu yaratık segmentleri
+        // Yaratık segmentleri (daha kısa, kompakt ve korkutucu)
         let segments = [];
-        const numSegments = 90; // Daha fazla ve karmaşık segment
-        const baseDistance = 6.0; // Segmentler arası mesafeyi azaltarak daha küçük ve sıkı bir yapı kurduk
+        const numSegments = 50; 
+        const baseDistance = 8.0; 
 
         for (let i = 0; i < numSegments; i++) {
             segments.push({ x: canvas.width / 2, y: canvas.height / 2 });
@@ -77,12 +77,9 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Göz alıcı, soğuk bir renk paleti (beyazdan mora geçiş)
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, "rgba(200, 200, 200, 0.9)");
-            gradient.addColorStop(1, "rgba(150, 50, 255, 0.9)"); // Hafif mor tonlar
-
-            ctx.strokeStyle = gradient;
+            // İstediğin gibi saf ve net beyaz renk
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
             ctx.lineWidth = 1.5;
             ctx.lineCap = "round";
 
@@ -94,59 +91,51 @@
             }
             ctx.stroke();
 
-            // Korkutucu detaylar: Dikenler ve ksenomorf benzeri kaburgalar
-            for (let i = 3; i < segments.length - 5; i += 4) {
+            // Bolca Kol ve Bacak Detayları
+            for (let i = 4; i < segments.length - 3; i += 3) {
                 let current = segments[i];
                 let next = segments[i + 1];
-                let prev = segments[i - 2];
-
-                // Omurganın açısını hesapla
-                let angle = Math.atan2(next.y - current.y, next.x - current.x);
-                let perpAngle = angle + Math.PI / 2; // Dik açı
-
-                // Kaburga uzunluğu
-                let ribLength = Math.max(5, 50 * Math.sin((Math.PI * i) / segments.length)); // Ortada daha uzun
-
-                // Sol kaburga/diken
-                let x1 = current.x + Math.cos(perpAngle) * ribLength;
-                let y1 = current.y + Math.sin(perpAngle) * ribLength;
-                // Sağ kaburga/diken
-                let x2 = current.x - Math.cos(perpAngle) * ribLength;
-                let y2 = current.y - Math.sin(perpAngle) * ribLength;
                 
-                // Omurgadan çıkan ana diken (Alien kafası/kuyruğu gibi)
-                let spikeEndX = current.x + Math.cos(angle + Math.PI) * (ribLength * 0.8);
-                let spikeEndY = current.y + Math.sin(angle + Math.PI) * (ribLength * 0.8);
+                let angle = Math.atan2(next.y - current.y, next.x - current.x);
+                let perpAngle = angle + Math.PI / 2; // Dik açı (kollar için)
+
+                // Gövdenin orta kısımlarında kollar daha uzun olsun
+                let armLength = (45 * Math.sin((Math.PI * i) / segments.length)) + 15;
+
+                // Sol kol / bacak
+                let leftX = current.x + Math.cos(perpAngle) * armLength;
+                let leftY = current.y + Math.sin(perpAngle) * armLength;
+                
+                // Sağ kol / bacak
+                let rightX = current.x - Math.cos(perpAngle) * armLength;
+                let rightY = current.y - Math.sin(perpAngle) * armLength;
+
+                // Eklem kırılımı için orta nokta (böcek bacağı efekti)
+                let jointOffset = Math.sin(Date.now() * 0.01 + i) * 10;
+                let midLeftX = (current.x + leftX) / 2 + Math.cos(angle) * (15 + jointOffset);
+                let midLeftY = (current.y + leftY) / 2 + Math.sin(angle) * (15 + jointOffset);
+
+                let midRightX = (current.x + rightX) / 2 + Math.cos(angle) * (15 - jointOffset);
+                let midRightY = (current.y + rightY) / 2 + Math.sin(angle) * (15 - jointOffset);
 
                 ctx.beginPath();
+                // Sol bacak çizimi (iki mafsallı)
                 ctx.moveTo(current.x, current.y);
-                ctx.lineTo(x1, y1); // Sol
+                ctx.lineTo(midLeftX, midLeftY);
+                ctx.lineTo(leftX, leftY);
+
+                // Sağ bacak çizimi (iki mafsallı)
                 ctx.moveTo(current.x, current.y);
-                ctx.lineTo(x2, y2); // Sağ
-                // Kuyruğa doğru giden ekstra diken
-                ctx.moveTo(current.x, current.y);
-                ctx.lineTo(spikeEndX, spikeEndY);
+                ctx.lineTo(midRightX, midRightY);
+                ctx.lineTo(rightX, rightY);
                 
                 ctx.stroke();
             }
 
-            // "Yaratık" Baş kısmı
-            let headSize = 8;
-            ctx.fillStyle = "white";
+            // Baş Kısmı
             ctx.beginPath();
-            ctx.arc(segments[0].x, segments[0].y, headSize, 0, Math.PI * 2);
-            // İki "göz" deliği
-            ctx.fillStyle = "#050505"; // Zemin renginde göz delikleri
-            ctx.beginPath();
-            ctx.arc(segments[0].x - 3, segments[0].y - 2, 1.5, 0, Math.PI * 2);
-            ctx.arc(segments[0].x + 3, segments[0].y - 2, 1.5, 0, Math.PI * 2);
+            ctx.arc(segments[0].x, segments[0].y, 6, 0, Math.PI * 2);
             ctx.fill();
-
-            // Işıma efekti (Glow)
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "rgba(150, 50, 255, 0.8)";
-            ctx.stroke(); // Son bir kez daha çizip parlamayı uygula
-            ctx.shadowBlur = 0; // Efekti kapat
         }
 
         function loop() {
