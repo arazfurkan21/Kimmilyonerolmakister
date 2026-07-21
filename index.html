@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Dragon - Tam Ekran</title>
+    <title>Korkutucu İskelet Takibi</title>
     <style>
         body, html {
             margin: 0;
@@ -11,23 +11,22 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #1a1a1a;
+            background-color: #050505; /* Çok daha koyu zemin */
+            cursor: crosshair;
         }
         canvas {
             display: block;
-            background-color: #111111;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="dragonCanvas"></canvas>
+    <canvas id="skeletonCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById("dragonCanvas");
+        const canvas = document.getElementById("skeletonCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Ekran boyutunu tam yap
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -38,10 +37,7 @@
         const Input = {
             mouse: {
                 x: canvas.width / 2,
-                y: canvas.height / 2,
-                left: false,
-                middle: false,
-                right: false
+                y: canvas.height / 2
             }
         };
 
@@ -50,21 +46,11 @@
             Input.mouse.y = event.clientY;
         });
 
-        document.addEventListener("mouseup", function(event) {
-            if (event.button === 0) Input.mouse.left = false;
-            if (event.button === 1) Input.mouse.middle = false;
-            if (event.button === 2) Input.mouse.right = false;
-        });
-
-        document.addEventListener("mousedown", function(event) {
-            if (event.button === 0) Input.mouse.left = true;
-            if (event.button === 1) Input.mouse.middle = true;
-            if (event.button === 2) Input.mouse.right = true;
-        });
-
+        // Korkutucu yaratık segmentleri
         let segments = [];
-        const numSegments = 70; // Uzun ve ihtişamlı gövde
-        
+        const numSegments = 90; // Daha fazla ve karmaşık segment
+        const baseDistance = 6.0; // Segmentler arası mesafeyi azaltarak daha küçük ve sıkı bir yapı kurduk
+
         for (let i = 0; i < numSegments; i++) {
             segments.push({ x: canvas.width / 2, y: canvas.height / 2 });
         }
@@ -73,8 +59,8 @@
             let targetX = Input.mouse.x;
             let targetY = Input.mouse.y;
 
-            segments[0].x += (targetX - segments[0].x) * 0.15;
-            segments[0].y += (targetY - segments[0].y) * 0.15;
+            segments[0].x += (targetX - segments[0].x) * 0.2;
+            segments[0].y += (targetY - segments[0].y) * 0.2;
 
             for (let i = 1; i < segments.length; i++) {
                 let lead = segments[i - 1];
@@ -82,18 +68,23 @@
                 let dx = lead.x - current.x;
                 let dy = lead.y - current.y;
                 let angle = Math.atan2(dy, dx);
-                let distance = 15; // Segmentler arası mesafe
 
-                current.x = lead.x - Math.cos(angle) * distance;
-                current.y = lead.y - Math.sin(angle) * distance;
+                current.x = lead.x - Math.cos(angle) * baseDistance;
+                current.y = lead.y - Math.sin(angle) * baseDistance;
             }
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
+            // Göz alıcı, soğuk bir renk paleti (beyazdan mora geçiş)
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "rgba(200, 200, 200, 0.9)");
+            gradient.addColorStop(1, "rgba(150, 50, 255, 0.9)"); // Hafif mor tonlar
+
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = "round";
 
             // Omurga çizgisi
             ctx.beginPath();
@@ -103,30 +94,59 @@
             }
             ctx.stroke();
 
-            // Kaburga detayları
-            for (let i = 2; i < segments.length - 2; i += 2) {
+            // Korkutucu detaylar: Dikenler ve ksenomorf benzeri kaburgalar
+            for (let i = 3; i < segments.length - 5; i += 4) {
                 let current = segments[i];
                 let next = segments[i + 1];
-                let angle = Math.atan2(next.y - current.y, next.x - current.x) + Math.PI / 2;
+                let prev = segments[i - 2];
+
+                // Omurganın açısını hesapla
+                let angle = Math.atan2(next.y - current.y, next.x - current.x);
+                let perpAngle = angle + Math.PI / 2; // Dik açı
+
+                // Kaburga uzunluğu
+                let ribLength = Math.max(5, 50 * Math.sin((Math.PI * i) / segments.length)); // Ortada daha uzun
+
+                // Sol kaburga/diken
+                let x1 = current.x + Math.cos(perpAngle) * ribLength;
+                let y1 = current.y + Math.sin(perpAngle) * ribLength;
+                // Sağ kaburga/diken
+                let x2 = current.x - Math.cos(perpAngle) * ribLength;
+                let y2 = current.y - Math.sin(perpAngle) * ribLength;
                 
-                let ribLength = 40 * (1 - i / segments.length) + 6;
-                let x1 = current.x + Math.cos(angle) * ribLength;
-                let y1 = current.y + Math.sin(angle) * ribLength;
-                let x2 = current.x - Math.cos(angle) * ribLength;
-                let y2 = current.y - Math.sin(angle) * ribLength;
+                // Omurgadan çıkan ana diken (Alien kafası/kuyruğu gibi)
+                let spikeEndX = current.x + Math.cos(angle + Math.PI) * (ribLength * 0.8);
+                let spikeEndY = current.y + Math.sin(angle + Math.PI) * (ribLength * 0.8);
 
                 ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(current.x, current.y);
-                ctx.lineTo(x2, y2);
+                ctx.moveTo(current.x, current.y);
+                ctx.lineTo(x1, y1); // Sol
+                ctx.moveTo(current.x, current.y);
+                ctx.lineTo(x2, y2); // Sağ
+                // Kuyruğa doğru giden ekstra diken
+                ctx.moveTo(current.x, current.y);
+                ctx.lineTo(spikeEndX, spikeEndY);
+                
                 ctx.stroke();
             }
 
-            // Baş kısmı
+            // "Yaratık" Baş kısmı
+            let headSize = 8;
             ctx.fillStyle = "white";
             ctx.beginPath();
-            ctx.arc(segments[0].x, segments[0].y, 7, 0, Math.PI * 2);
+            ctx.arc(segments[0].x, segments[0].y, headSize, 0, Math.PI * 2);
+            // İki "göz" deliği
+            ctx.fillStyle = "#050505"; // Zemin renginde göz delikleri
+            ctx.beginPath();
+            ctx.arc(segments[0].x - 3, segments[0].y - 2, 1.5, 0, Math.PI * 2);
+            ctx.arc(segments[0].x + 3, segments[0].y - 2, 1.5, 0, Math.PI * 2);
             ctx.fill();
+
+            // Işıma efekti (Glow)
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(150, 50, 255, 0.8)";
+            ctx.stroke(); // Son bir kez daha çizip parlamayı uygula
+            ctx.shadowBlur = 0; // Efekti kapat
         }
 
         function loop() {
